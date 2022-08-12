@@ -1,6 +1,6 @@
 {
   "name": "@tuily/react-mobile-picker-scroll",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "An iOS like select box component for React, with scroll wheel and keyboard support",
   "main": "lib/react-mobile-picker.js",
   "repository": {
