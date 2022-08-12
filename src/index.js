@@ -197,9 +197,10 @@ class PickerColumn extends Component {
 
     const { startDate, endDate, scrollerTranslate, isMoving } = this.state;
 
-    const timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
+    let timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
 
     if (timeDiff && !isMoving) {
+      timeDiff = timeDiff > 800 ? 800 : timeDiff;
       style.transitionDuration = `${timeDiff}ms`;
     }
     if (this.state.isMoving) {
