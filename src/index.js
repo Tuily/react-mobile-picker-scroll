@@ -202,7 +202,7 @@ class PickerColumn extends Component {
     let timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
 
     if (timeDiff && !isMoving) {
-      timeDiff = timeDiff > 2000 ? timeDiff / 2 : timeDiff;
+      // timeDiff = timeDiff > 2000 ? timeDiff / 2 : timeDiff;
       style.transitionDuration = `${timeDiff}ms`;
     }
     if (this.state.isMoving) {
