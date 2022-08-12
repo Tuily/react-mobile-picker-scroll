@@ -164,6 +164,8 @@ class PickerColumn extends Component {
       return {
         scrollerTranslate: newTranslate,
         isScrolling: Date.now(),
+        startDate: Date.now(),
+        endDate: Date.now() + 1000,
       };
     });
   };
@@ -200,7 +202,7 @@ class PickerColumn extends Component {
     let timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
 
     if (timeDiff && !isMoving) {
-      timeDiff = timeDiff > 800 ? 800 : timeDiff;
+      timeDiff = timeDiff > 1000 ? 200 : timeDiff;
       style.transitionDuration = `${timeDiff}ms`;
     }
     if (this.state.isMoving) {
