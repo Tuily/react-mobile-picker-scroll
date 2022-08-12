@@ -171,7 +171,6 @@ class PickerColumn extends Component {
   renderItems() {
     const { options, itemHeight, value } = this.props;
     return options.map((option, index) => {
-      console.log(this.state.startTouchY, this.state.endTouchY);
       const style = {
         height: itemHeight + 'px',
         lineHeight: itemHeight + 'px',
@@ -196,12 +195,12 @@ class PickerColumn extends Component {
       transform: translateString,
     };
 
-    const { startDate, endDate, scrollerTranslate } = this.state;
+    const { startDate, endDate, scrollerTranslate, isMoving } = this.state;
 
     const timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
 
-    if (timeDiff) {
-      style.transitionDuration = `${500 + timeDiff}ms`;
+    if (timeDiff && !isMoving) {
+      style.transitionDuration = `${timeDiff}ms`;
     }
     if (this.state.isMoving) {
       // style.transitionDuration = '0ms';
