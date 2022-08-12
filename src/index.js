@@ -10,7 +10,7 @@ class PickerColumn extends Component {
     itemHeight: PropTypes.number.isRequired,
     columnHeight: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
-    tabIndex: PropTypes.number.isRequired
+    tabIndex: PropTypes.number.isRequired,
   };
 
   constructor(props) {
@@ -18,8 +18,11 @@ class PickerColumn extends Component {
     this.state = {
       isMoving: false,
       startTouchY: 0,
+      startDate: null,
+      endDate: null,
+      endTouchY: 0,
       startScrollerTranslate: 0,
-      ...this.computeTranslate(props)
+      ...this.computeTranslate(props),
     };
   }
 
@@ -39,10 +42,11 @@ class PickerColumn extends Component {
       this.onValueSelected(options[0]);
       selectedIndex = 0;
     }
+
     return {
       scrollerTranslate: columnHeight / 2 - itemHeight / 2 - selectedIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * options.length + itemHeight / 2,
-      maxTranslate: columnHeight / 2 - itemHeight / 2
+      maxTranslate: columnHeight / 2 - itemHeight / 2,
     };
   };
 
@@ -54,18 +58,19 @@ class PickerColumn extends Component {
     const startTouchY = event.targetTouches[0].pageY;
     this.setState(({ scrollerTranslate }) => ({
       startTouchY,
-      startScrollerTranslate: scrollerTranslate
+      startDate: Date.now(),
+      startScrollerTranslate: scrollerTranslate,
     }));
   };
 
   handleTouchMove = (event) => {
-    event.preventDefault();
     const touchY = event.targetTouches[0].pageY;
+
     this.setState(({ isMoving, startTouchY, startScrollerTranslate, minTranslate, maxTranslate }) => {
       if (!isMoving) {
         return {
-          isMoving: true
-        }
+          isMoving: true,
+        };
       }
 
       let nextScrollerTranslate = startScrollerTranslate + touchY - startTouchY;
@@ -75,7 +80,7 @@ class PickerColumn extends Component {
         nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
       }
       return {
-        scrollerTranslate: nextScrollerTranslate
+        scrollerTranslate: nextScrollerTranslate,
       };
     });
   };
@@ -87,7 +92,8 @@ class PickerColumn extends Component {
     this.setState({
       isMoving: false,
       startTouchY: 0,
-      startScrollerTranslate: 0
+      startScrollerTranslate: 0,
+      endDate: Date.now(),
     });
     setTimeout(() => {
       this.postMove();
@@ -102,7 +108,7 @@ class PickerColumn extends Component {
       isMoving: false,
       startTouchY: 0,
       startScrollerTranslate: 0,
-      scrollerTranslate: startScrollerTranslate
+      scrollerTranslate: startScrollerTranslate,
     }));
   };
 
@@ -121,7 +127,7 @@ class PickerColumn extends Component {
     } else if (scrollerTranslate < minTranslate) {
       activeIndex = options.length - 1;
     } else {
-      activeIndex = - Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
+      activeIndex = -Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
     }
     this.onValueSelected(options[activeIndex]);
   }
@@ -129,7 +135,7 @@ class PickerColumn extends Component {
   postWheel() {
     const that = this;
     setTimeout(() => {
-      if (that.state.isScrolling > (Date.now() - 250)) {
+      if (that.state.isScrolling > Date.now() - 250) {
         this.postWheel();
         return;
       }
@@ -138,8 +144,8 @@ class PickerColumn extends Component {
   }
 
   handleScroll = (event) => {
-
     // Support for keyboard up/down
+
     let deltaY;
     if (!!event.keyCode && (event.keyCode == 38 || event.keyCode == 40)) {
       deltaY = event.keyCode == 38 ? 53 : -53;
@@ -157,7 +163,7 @@ class PickerColumn extends Component {
 
       return {
         scrollerTranslate: newTranslate,
-        isScrolling: Date.now()
+        isScrolling: Date.now(),
       };
     });
   };
@@ -165,17 +171,16 @@ class PickerColumn extends Component {
   renderItems() {
     const { options, itemHeight, value } = this.props;
     return options.map((option, index) => {
+      console.log(this.state.startTouchY, this.state.endTouchY);
       const style = {
         height: itemHeight + 'px',
-        lineHeight: itemHeight + 'px'
+        lineHeight: itemHeight + 'px',
       };
       const className = `picker-item${option === value ? ' picker-item-selected' : ''}`;
       return (
-        <div
-          key={index}
-          className={className}
-          style={style}
-          onClick={() => this.handleItemClick(option)}>{option}</div>
+        <div key={index} className={className} style={style} onClick={() => this.handleItemClick(option)}>
+          {option}
+        </div>
       );
     });
   }
@@ -188,16 +193,24 @@ class PickerColumn extends Component {
       MozTransform: translateString,
       OTransform: translateString,
       WebkitTransform: translateString,
-      transform: translateString
+      transform: translateString,
     };
+
+    const { startDate, endDate, scrollerTranslate } = this.state;
+
+    const timeDiff = Math.abs((endDate - startDate) * scrollerTranslate) / 1000;
+
+    if (timeDiff) {
+      style.transitionDuration = `${500 + timeDiff}ms`;
+    }
     if (this.state.isMoving) {
-      style.transitionDuration = '0ms';
+      // style.transitionDuration = '0ms';
     }
     return (
-      <div className="picker-column">
+      <div className='picker-column'>
         <div
           tabIndex={tabIndex}
-          className="picker-scroller"
+          className='picker-scroller'
           style={style}
           onTouchStart={this.handleTouchStart}
           onTouchMove={this.handleTouchMove}
@@ -209,7 +222,7 @@ class PickerColumn extends Component {
           {this.renderItems()}
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -219,19 +232,19 @@ export default class Picker extends Component {
     valueGroups: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
     itemHeight: PropTypes.number,
-    height: PropTypes.number
+    height: PropTypes.number,
   };
 
   static defaultProps = {
     itemHeight: 36,
-    height: 216
+    height: 216,
   };
 
   renderInner() {
     const { optionGroups, valueGroups, itemHeight, height, onChange } = this.props;
     const highlightStyle = {
       height: itemHeight,
-      marginTop: -(itemHeight / 2)
+      marginTop: -(itemHeight / 2),
     };
     let index = 1000;
     const columnNodes = [];
@@ -245,24 +258,25 @@ export default class Picker extends Component {
           value={valueGroups[name]}
           itemHeight={itemHeight}
           columnHeight={height}
-          onChange={onChange} />
+          onChange={onChange}
+        />
       );
     }
     return (
-      <div className="picker-inner">
+      <div className='picker-inner'>
         {columnNodes}
-        <div className="picker-highlight" style={highlightStyle}></div>
+        <div className='picker-highlight' style={highlightStyle}></div>
       </div>
     );
   }
 
   render() {
     const style = {
-      height: this.props.height
+      height: this.props.height,
     };
 
     return (
-      <div className="picker-container" style={style}>
+      <div className='picker-container' style={style}>
         {this.renderInner()}
       </div>
     );
